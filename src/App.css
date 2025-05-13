@@ -1,38 +1,444 @@
-.App {
-  text-align: center;
+body {
+  background: linear-gradient(-45deg, #ee7752, #e73c7e, #23a6d5, #23d5ab);
+  background-size: 400% 400%;
+  animation: gradientBG 15s ease infinite;
 }
 
-.App-logo {
-  height: 40vmin;
-  pointer-events: none;
+@keyframes gradientBG {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
 }
 
-@media (prefers-reduced-motion: no-preference) {
-  .App-logo {
-    animation: App-logo-spin infinite 20s linear;
-  }
+
+.app {
+  margin-left: 50px;
+  padding: 1rem;
 }
 
-.App-header {
-  background-color: #282c34;
+/* Board Layout */
+.board {
+  display: flex;
+  gap: 1.5rem;
+  overflow-x: auto;
+  padding: 1rem;
+}
+
+
+.ticket {
+  background: rgba(255, 255, 255, 0.15);
+  padding: 10px;
+  border-radius: 8px;
+  margin-bottom: 10px;
+  transition: none; /* ⛔ Remove transitions to prevent drag shake */
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+}
+
+
+.ticket.dragging {
+  transform: rotate(1deg) scale(1.03);
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+}
+
+.column.drag-over {
+  background-color: rgba(255, 255, 255, 0.1);
+  border: 2px dashed #a3a3ff;
+}
+
+
+/* Main Content Area */
+.dashboard-main {
+  margin-left: 200px;
+  padding: 2rem;
+  background-color: #f4f5f7;
   min-height: 100vh;
+  transition: margin-left 0.3s ease;
   display: flex;
   flex-direction: column;
+  gap: 1.5rem;
+}
+
+.dashboard-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.dashboard-header h1 {
+  font-size: 1.8rem;
+  color: #172b4d;
+  margin: 0;
+}
+
+.dashboard-controls {
+  display: flex;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}
+
+.dashboard-content {
+  background-color: #ffffff;
+  border-radius: 10px;
+  padding: 1.5rem;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+  flex-grow: 1;
+  overflow: auto;
+}
+label {
+  font-size: 1rem;
+  font-weight: 400;
+  color: rgba(255, 255, 255, 0.8); /* Lighter transparent white */
+  margin-bottom: 0.5rem;
+  display: block;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  transition: color 0.3s ease;
+}
+
+.main-content {
+  margin-left: 200px;
+  padding: 2rem;
+  background-color: #f4f5f7;
+  min-height: 100vh;
+  box-sizing: border-box;
+}
+
+.app-header {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  margin-bottom: 1.5rem;
+}
+
+.app-header .header {
+  font-size: 2rem;
+  font-weight: 600;
+  color: #172b4d;
+  margin: 0;
+}
+
+.filters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  align-items: center;
+}
+
+.search {
+  padding: 0.5rem 1rem;
+  border: 1px solid #dfe1e6;
+  border-radius: 4px;
+  font-size: 0.95rem;
+  width: 350px;
+}
+
+.dropdown {
+  padding: 0.5rem 1rem;
+  border: 1px solid #dfe1e6;
+  border-radius: 4px;
+  background-color: #fff;
+  font-size: 0.95rem;
+  color: #333;
+}
+
+/* Columns */
+.column {
+  background-color: #ffffff;
+  border-radius: 10px;
+  padding: 1rem;
+  min-width: 220px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
+  display: flex;
+  flex-direction: column;
+}
+
+.column h2 {
+  margin-bottom: 1rem;
+  font-size: 1.1rem;
+  color: #344563;
+  border-bottom: 1px solid #eee;
+  padding-bottom: 0.5rem;
+}
+
+/* Tickets */
+.ticket {
+  background-color: #fdfdfd;
+  border-radius: 8px;
+  padding: 1rem;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.06);
+  position: relative;
+  font-size: 0.95rem;
+  cursor: grab;
+  transition: transform 0.2s, background-color 0.2s;
+}
+
+.ticket:hover {
+  background-color: #f5f8fa;
+  transform: scale(1.02);
+}
+
+.ticket:active {
+  cursor: grabbing;
+  opacity: 0.6;
+}
+
+/* Ticket Actions */
+.ticket-actions {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  display: flex;
+  gap: 10px;
+}
+
+.icon {
+  font-size: 16px;
+  cursor: pointer;
+  color: #6b778c;
+  transition: color 0.2s ease;
+}
+
+.edit-icon:hover {
+  color: #1d72b8;
+}
+
+.delete-icon:hover {
+  color: #de350b;
+}
+
+/* Modal Overlay */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 90%;
+  height: 80%;
+  background: rgba(9, 30, 66, 0.4);
+  display: flex;
   align-items: center;
   justify-content: center;
-  font-size: calc(10px + 2vmin);
+  z-index: 1000;
+}
+
+/* Modal Window */
+.modal {
+  background-color: white;
+  padding: 2rem;
+  width: 400px;
+  max-width: 90%;
+  border-radius: 8px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
+}
+
+.modal h2 {
+  margin-top: 0;
+  color: #172b4d;
+}
+
+.modal-input,
+.modal-textarea,
+.modal-select {
+  width: 100%;
+  padding: 0.5rem;
+  margin-top: 1rem;
+  margin-bottom: 1rem;
+  border: 1px solid #dfe1e6;
+  border-radius: 4px;
+  font-size: 0.9rem;
+  font-family: inherit;
+}
+
+.modal-textarea {
+  resize: vertical;
+  min-height: 80px;
+}
+
+.modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.5rem;
+}
+
+.modal-btn {
+  padding: 0.5rem 1rem;
+  border: none;
+  background-color: #0052cc;
+  color: white;
+  border-radius: 4px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 0.2s ease;
+}
+
+.modal-btn.cancel {
+  background-color: #e0e0e0;
+  color: #333;
+}
+
+.modal-btn:hover {
+  background-color: #0065ff;
+}
+
+.modal-btn.cancel:hover {
+  background-color: #ccc;
+}
+
+/* Add Ticket Button */
+.add-ticket-btn {
+  padding: 0.5rem 1rem;
+  border: none;
+  background-color: #0052cc;
+  color: white;
+  border-radius: 4px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 0.2s ease;
+}
+
+.add-ticket-btn:hover {
+  background-color: #0065ff;
+}
+
+/* Sidebar Container */
+.sidebar {
+  width: 200px;
+  background-color: #172b4d;
+  color: white;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  height: 100vh;
+  padding: 1.5rem 1rem;
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: 100;
+}
+
+/* Logo */
+.sidebar .logo {
+  font-size: 1.5rem;
+  font-weight: bold;
+  margin-bottom: 2rem;
+  text-align: center;
+  color: #fff;
+}
+
+/* Navigation */
+.sidebar nav ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.sidebar nav ul li {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 0.75rem 1rem;
+  margin-bottom: 0.5rem;
+  border-radius: 6px;
+  cursor: pointer;
+  color: #dfe1e6;
+  transition: background-color 0.3s ease;
+}
+
+.sidebar nav ul li:hover,
+.sidebar nav ul li.active {
+  background-color: #1d3f6e;
   color: white;
 }
 
-.App-link {
-  color: #61dafb;
+/* User Section */
+.user-section {
+  background-color: #253858;
+  padding: 1rem;
+  border-radius: 8px;
+  color: #dfe1e6;
+  margin-top: 2rem;
 }
 
-@keyframes App-logo-spin {
-  from {
-    transform: rotate(0deg);
+.user-section .avatar {
+  background-color: #0052cc;
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: bold;
+  font-size: 1rem;
+  margin-bottom: 0.5rem;
+}
+
+.user-section strong {
+  display: block;
+  color: #ffffff;
+}
+
+.user-section p {
+  margin: 0.25rem 0;
+  font-size: 0.85rem;
+  color: #b8c1d9;
+}
+
+/* Buttons */
+.user-section .actions {
+  margin-top: 1rem;
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.user-section button {
+  padding: 0.4rem 0.75rem;
+  border: none;
+  border-radius: 4px;
+  background-color: #0052cc;
+  color: white;
+  cursor: pointer;
+  font-size: 0.8rem;
+  transition: background-color 0.2s ease;
+}
+
+.user-section button:hover {
+  background-color: #0065ff;
+}
+
+/* Modal duplicate fix */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(9, 30, 66, 0.4);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 200;
+}
+
+.modal-content {
+  background: white;
+  padding: 2rem;
+  border-radius: 8px;
+  width: 90%;
+  max-width: 500px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+}
+
+/* Responsive Filters */
+@media (max-width: 600px) {
+  .filters {
+    flex-direction: column;
+    align-items: stretch;
   }
-  to {
-    transform: rotate(360deg);
+
+  .search,
+  .dropdown,
+  .add-ticket-btn {
+    width: 100%;
   }
 }
