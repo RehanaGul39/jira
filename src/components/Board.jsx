@@ -47,37 +47,47 @@ export default function Board() {
     const { source, destination } = result;
     if (!destination) return;
 
-    const updatedColumns = { ...columns };
+    // Deep copy the columns to avoid direct mutation
+    const updatedColumns = JSON.parse(JSON.stringify(columns));
+
+    // Get the moved ticket and update the columns
     const [movedTicket] = updatedColumns[source.droppableId].items.splice(source.index, 1);
     updatedColumns[destination.droppableId].items.splice(destination.index, 0, movedTicket);
+
+    // Set the updated columns state
     setColumns(updatedColumns);
   };
 
   const handleDelete = (ticketId) => {
-    const updatedColumns = { ...columns };
+    const updatedColumns = JSON.parse(JSON.stringify(columns));
+
+    // Remove the ticket from all columns
     for (const key in updatedColumns) {
       updatedColumns[key].items = updatedColumns[key].items.filter(
         (ticket) => ticket.id !== ticketId
       );
     }
+
     setColumns(updatedColumns);
   };
 
   const handleTicketCreate = (newTicket) => {
-    const updatedColumns = { ...columns };
+    const updatedColumns = JSON.parse(JSON.stringify(columns));
     updatedColumns[newTicket.status].items.push(newTicket);
     setColumns(updatedColumns);
   };
 
   const handleTicketUpdate = (updatedTicket) => {
-    const updatedColumns = { ...columns };
+    const updatedColumns = JSON.parse(JSON.stringify(columns));
 
+    // Remove the ticket from all columns
     Object.keys(updatedColumns).forEach((key) => {
       updatedColumns[key].items = updatedColumns[key].items.filter(
         (item) => item.id !== updatedTicket.id
       );
     });
 
+    // Add the updated ticket to the correct column
     updatedColumns[updatedTicket.status].items.push(updatedTicket);
     setColumns(updatedColumns);
   };

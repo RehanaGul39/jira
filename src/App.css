@@ -10,7 +10,6 @@ body {
   100% { background-position: 0% 50%; }
 }
 
-
 .app {
   margin-left: 50px;
   padding: 1rem;
@@ -24,16 +23,14 @@ body {
   padding: 1rem;
 }
 
-
 .ticket {
   background: rgba(255, 255, 255, 0.15);
   padding: 10px;
   border-radius: 8px;
   margin-bottom: 10px;
-  transition: none; /* ⛔ Remove transitions to prevent drag shake */
+  transition: none;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
 }
-
 
 .ticket.dragging {
   transform: rotate(1deg) scale(1.03);
@@ -44,7 +41,6 @@ body {
   background-color: rgba(255, 255, 255, 0.1);
   border: 2px dashed #a3a3ff;
 }
-
 
 /* Main Content Area */
 .dashboard-main {
@@ -85,10 +81,11 @@ body {
   flex-grow: 1;
   overflow: auto;
 }
+
 label {
   font-size: 1rem;
   font-weight: 400;
-  color: rgba(255, 255, 255, 0.8); /* Lighter transparent white */
+  color: rgba(255, 255, 255, 0.8);
   margin-bottom: 0.5rem;
   display: block;
   text-transform: uppercase;
@@ -161,6 +158,13 @@ label {
   padding-bottom: 0.5rem;
 }
 
+.empty-state {
+  color: #999;
+  font-size: 0.9rem;
+  text-align: center;
+  margin-top: 0.5rem;
+}
+
 /* Tickets */
 .ticket {
   background-color: #fdfdfd;
@@ -181,6 +185,12 @@ label {
 .ticket:active {
   cursor: grabbing;
   opacity: 0.6;
+}
+
+.ticket-description {
+  font-size: 0.85rem;
+  color: #5e6c84;
+  margin-top: 0.5rem;
 }
 
 /* Ticket Actions */
@@ -212,13 +222,22 @@ label {
   position: fixed;
   top: 0;
   left: 0;
-  width: 90%;
-  height: 80%;
+  width: 100%;
+  height: 100%;
   background: rgba(9, 30, 66, 0.4);
   display: flex;
-  align-items: center;
   justify-content: center;
-  z-index: 1000;
+  align-items: center;
+  z-index: 200;
+}
+
+.modal-content {
+  background: white;
+  padding: 2rem;
+  border-radius: 8px;
+  width: 90%;
+  max-width: 500px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
 }
 
 /* Modal Window */
@@ -383,7 +402,6 @@ label {
   color: #b8c1d9;
 }
 
-/* Buttons */
 .user-section .actions {
   margin-top: 1rem;
   display: flex;
@@ -406,30 +424,13 @@ label {
   background-color: #0065ff;
 }
 
-/* Modal duplicate fix */
-.modal-overlay {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background: rgba(9, 30, 66, 0.4);
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  z-index: 200;
-}
-
-.modal-content {
-  background: white;
-  padding: 2rem;
-  border-radius: 8px;
-  width: 90%;
-  max-width: 500px;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
-}
-
 /* Responsive Filters */
+@media (max-width: 768px) {
+  .column {
+    min-width: 90vw;
+  }
+}
+
 @media (max-width: 600px) {
   .filters {
     flex-direction: column;

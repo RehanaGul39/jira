@@ -7,8 +7,8 @@ export default function TicketModal({
   onTicketUpdate,
 }) {
   const [ticket, setTicket] = useState({
-    title: 'New Research Task',
-    description: 'Add a description...',
+    title: '',
+    description: '',
     status: 'todo',
   });
 
@@ -58,7 +58,7 @@ export default function TicketModal({
             value={ticket.title}
             onChange={handleInputChange}
             required
-            placeholder="Enter title..."  // Placeholder to guide user
+            placeholder="Enter title..."
           />
 
           <label>Description</label>
@@ -68,7 +68,7 @@ export default function TicketModal({
             value={ticket.description}
             onChange={handleInputChange}
             required
-            placeholder="Add a detailed description..."  // Placeholder to guide user
+            placeholder="Add a detailed description..."
           />
 
           <label>Status</label>
@@ -87,8 +87,6 @@ export default function TicketModal({
             <button type="submit" className="modal-btn">
               {ticketToEdit ? 'Update Ticket' : 'Create Ticket'}
             </button>
-           
-            
           </div>
         </form>
       </div>
