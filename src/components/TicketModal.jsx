@@ -5,18 +5,25 @@ export default function TicketModal({
   ticketToEdit,
   onTicketCreate,
   onTicketUpdate,
+  defaultStatus = "todo"
 }) {
   const [ticket, setTicket] = useState({
     title: '',
     description: '',
-    status: 'todo',
+    status: defaultStatus,
   });
 
   useEffect(() => {
     if (ticketToEdit) {
       setTicket(ticketToEdit);
+    } else {
+      setTicket({
+        title: '',
+        description: '',
+        status: defaultStatus,
+      });
     }
-  }, [ticketToEdit]);
+  }, [ticketToEdit, defaultStatus]);
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -78,9 +85,8 @@ export default function TicketModal({
             value={ticket.status}
             onChange={handleInputChange}
           >
-            <option value="todo">Backlog</option>
-            <option value="inprogress">Exploring 🧪</option>
-            <option value="done">Active Research 📗</option>
+            <option value="todo">To-Do</option>
+           
           </select>
 
           <div className="modal-actions">

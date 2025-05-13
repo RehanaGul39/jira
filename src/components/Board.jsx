@@ -5,14 +5,15 @@ import { FaEdit, FaTrash } from "react-icons/fa";
 
 export default function Board() {
   const defaultColumns = {
-    todo: { title: "Backlog", items: [] },
-    inprogress: { title: "Exploring 🧪", items: [] },
-    done: { title: "Active Research 📗", items: [] },
+    todo: { title: "TO-DO", items: [] },
+    inprogress: { title: "In Progress 🧪", items: [] },
+    done: { title: "Completed📗", items: [] },
   };
 
   const [columns, setColumns] = useState(defaultColumns);
   const [modalOpen, setModalOpen] = useState(false);
   const [editTicket, setEditTicket] = useState(null);
+  const [createInStatus, setCreateInStatus] = useState("todo");
 
   useEffect(() => {
     const saved = localStorage.getItem("columns");
@@ -47,47 +48,38 @@ export default function Board() {
     const { source, destination } = result;
     if (!destination) return;
 
-    // Deep copy the columns to avoid direct mutation
     const updatedColumns = JSON.parse(JSON.stringify(columns));
-
-    // Get the moved ticket and update the columns
     const [movedTicket] = updatedColumns[source.droppableId].items.splice(source.index, 1);
     updatedColumns[destination.droppableId].items.splice(destination.index, 0, movedTicket);
 
-    // Set the updated columns state
     setColumns(updatedColumns);
   };
 
   const handleDelete = (ticketId) => {
     const updatedColumns = JSON.parse(JSON.stringify(columns));
-
-    // Remove the ticket from all columns
     for (const key in updatedColumns) {
       updatedColumns[key].items = updatedColumns[key].items.filter(
         (ticket) => ticket.id !== ticketId
       );
     }
-
     setColumns(updatedColumns);
   };
 
   const handleTicketCreate = (newTicket) => {
-    const updatedColumns = JSON.parse(JSON.stringify(columns));
-    updatedColumns[newTicket.status].items.push(newTicket);
-    setColumns(updatedColumns);
+    setColumns(prevColumns => {
+      const updatedColumns = JSON.parse(JSON.stringify(prevColumns));
+      updatedColumns[newTicket.status].items.push(newTicket);
+      return updatedColumns;
+    });
   };
 
   const handleTicketUpdate = (updatedTicket) => {
     const updatedColumns = JSON.parse(JSON.stringify(columns));
-
-    // Remove the ticket from all columns
     Object.keys(updatedColumns).forEach((key) => {
       updatedColumns[key].items = updatedColumns[key].items.filter(
         (item) => item.id !== updatedTicket.id
       );
     });
-
-    // Add the updated ticket to the correct column
     updatedColumns[updatedTicket.status].items.push(updatedTicket);
     setColumns(updatedColumns);
   };
@@ -105,6 +97,7 @@ export default function Board() {
                   {...provided.droppableProps}
                 >
                   <h2>{column.title}</h2>
+
                   {column.items.map((ticket, index) => (
                     <Draggable key={ticket.id} draggableId={ticket.id} index={index}>
                       {(provided, snapshot) => (
@@ -134,7 +127,22 @@ export default function Board() {
                       )}
                     </Draggable>
                   ))}
+
                   {provided.placeholder}
+
+                  {/* Only show the "+" button in the "todo" column */}
+                  {key === "todo" && (
+                    <button
+                      className="add-ticket-plus"
+                      onClick={() => {
+                        setEditTicket(null);
+                        setCreateInStatus(key);
+                        setModalOpen(true);
+                      }}
+                    >
+                      +
+                    </button>
+                  )}
                 </div>
               )}
             </Droppable>
@@ -144,10 +152,14 @@ export default function Board() {
 
       {modalOpen && (
         <TicketModal
-          closeModal={() => setModalOpen(false)}
+          closeModal={() => {
+            setModalOpen(false);
+            setCreateInStatus("todo");
+          }}
           ticketToEdit={editTicket}
           onTicketCreate={handleTicketCreate}
           onTicketUpdate={handleTicketUpdate}
+          defaultStatus={createInStatus}
         />
       )}
     </div>

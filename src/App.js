@@ -96,18 +96,19 @@ export default function App() {
         {/* Main Content Area */}
         <div className="main-content">
           <header className="app-header">
-            <h1 className="header">✨ Design board ✨</h1>
+            <h1 className="header">✨ Design Board ✨</h1>
             <div className="filters">
               <input type="text" placeholder="Search..." className="search" />
-              <select className="dropdown">
-                <option>Experience</option>
-              </select>
-              <select className="dropdown">
-                <option>Label</option>
-              </select>
-              <button className="add-ticket-btn" onClick={handleOpenModal}>
-                + Add Ticket
-              </button>
+             <div className="user-profile">
+        <img src="https://cdn-images-1.medium.com/max/2000/1*FZ7uRxV5XEx4YXLOl4ZG6w.jpeg" alt="User" className="user-image" />
+              <button className="overview-btn">Experience</button>
+    
+      <button className="overview-btn">Label</button>
+
+        {/* Overview Button */}
+        <button className="overview-btn">Overview</button>
+      </div>
+    
             </div>
           </header>
           <Board columns={columns} onEdit={handleEdit} onViewDetails={handleViewTicketDetails} />
