@@ -52,15 +52,19 @@ export default function TicketModal({
   };
 
   return (
-    <div className="modal-overlay">
-      <div className="modal-content">
-        <button className="close-btn" onClick={closeModal}>X</button>
+    <div className="modal-overlay" onClick={closeModal}>
+      <div
+        className="modal-content"
+        onClick={(e) => e.stopPropagation()} 
+      >
+        <button className="close-btn" onClick={closeModal} aria-label="Close modal">X</button>
         <h2>{ticketToEdit ? 'Edit Ticket' : 'Create New Ticket'}</h2>
         <form onSubmit={handleSubmit}>
-          <label>Title</label>
+          <label htmlFor="title">Title</label>
           <input
             className="modal-input"
             type="text"
+            id="title"
             name="title"
             value={ticket.title}
             onChange={handleInputChange}
@@ -68,9 +72,10 @@ export default function TicketModal({
             placeholder="Enter title..."
           />
 
-          <label>Description</label>
+          <label htmlFor="description">Description</label>
           <textarea
             className="modal-textarea"
+            id="description"
             name="description"
             value={ticket.description}
             onChange={handleInputChange}
@@ -78,15 +83,17 @@ export default function TicketModal({
             placeholder="Add a detailed description..."
           />
 
-          <label>Status</label>
+          <label htmlFor="status">Status</label>
           <select
             className="modal-select"
+            id="status"
             name="status"
             value={ticket.status}
             onChange={handleInputChange}
           >
             <option value="todo">To-Do</option>
-           
+            <option value="inprogress">In Progress</option>
+            <option value="done">Completed</option>
           </select>
 
           <div className="modal-actions">

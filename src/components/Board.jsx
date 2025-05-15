@@ -1,13 +1,25 @@
 import React, { useEffect, useState } from "react";
 import TicketModal from "./TicketModal";
-import { DragDropContext, Droppable, Draggable } from "react-beautiful-dnd";
-import { FaEdit, FaTrash } from "react-icons/fa";
+import SortableTicket from "./SortableTicket";
+import {
+  DndContext,
+  closestCorners,
+  PointerSensor,
+  useSensor,
+  useSensors,
+  useDroppable,
+} from "@dnd-kit/core";
+import {
+  arrayMove,
+  SortableContext,
+  verticalListSortingStrategy,
+} from "@dnd-kit/sortable";
 
 export default function Board() {
   const defaultColumns = {
     todo: { title: "TO-DO", items: [] },
     inprogress: { title: "In Progress 🧪", items: [] },
-    done: { title: "Completed📗", items: [] },
+    done: { title: "Completed 📗", items: [] },
   };
 
   const [columns, setColumns] = useState(defaultColumns);
@@ -15,26 +27,26 @@ export default function Board() {
   const [editTicket, setEditTicket] = useState(null);
   const [createInStatus, setCreateInStatus] = useState("todo");
 
+  const sensors = useSensors(useSensor(PointerSensor));
+
   useEffect(() => {
     const saved = localStorage.getItem("columns");
     if (saved) {
       try {
         const parsed = JSON.parse(saved);
         const sanitizedColumns = {};
-
-        Object.entries(defaultColumns).forEach(([key, defaultValue]) => {
-          const savedColumn = parsed[key];
+        Object.entries(defaultColumns).forEach(([key, def]) => {
+          const savedCol = parsed[key];
           sanitizedColumns[key] = {
-            title: defaultValue.title,
-            items: Array.isArray(savedColumn?.items)
-              ? savedColumn.items.filter(item => item && item.id && item.title)
+            title: def.title,
+            items: Array.isArray(savedCol?.items)
+              ? savedCol.items.filter((i) => i && i.id && i.title)
               : [],
           };
         });
-
         setColumns(sanitizedColumns);
-      } catch (error) {
-        console.error("Error loading saved board:", error);
+      } catch (err) {
+        console.error("Error loading saved board:", err);
         setColumns(defaultColumns);
       }
     }
@@ -44,111 +56,140 @@ export default function Board() {
     localStorage.setItem("columns", JSON.stringify(columns));
   }, [columns]);
 
-  const handleDrop = (result) => {
-    const { source, destination } = result;
-    if (!destination) return;
+  const handleDragEnd = (event) => {
+    const { active, over } = event;
+    if (!over || active.id === over.id) return;
 
-    const updatedColumns = JSON.parse(JSON.stringify(columns));
-    const [movedTicket] = updatedColumns[source.droppableId].items.splice(source.index, 1);
-    updatedColumns[destination.droppableId].items.splice(destination.index, 0, movedTicket);
+    const activeId = active.id;
+    const overId = over.id;
+
+    let sourceColId = null;
+    let sourceIndex = null;
+
+   
+    for (const colId in columns) {
+      const index = columns[colId].items.findIndex((item) => item.id === activeId);
+      if (index !== -1) {
+        sourceColId = colId;
+        sourceIndex = index;
+        break;
+      }
+    }
+
+    if (!sourceColId) return;
+    const movedTicket = columns[sourceColId].items[sourceIndex];
+
+    let destColId = null;
+    let destIndex = null;
+
+    for (const colId in columns) {
+      const index = columns[colId].items.findIndex((item) => item.id === overId);
+      if (index !== -1) {
+        destColId = colId;
+        destIndex = index;
+        break;
+      }
+    }
+
+    if (!destColId && columns[overId]) {
+    
+      destColId = overId;
+      destIndex = columns[destColId].items.length;
+    }
+
+    if (!destColId) return;
+
+    const updatedColumns = { ...columns };
+
+  
+    updatedColumns[sourceColId].items.splice(sourceIndex, 1);
+
+    // Update status if moved between columns
+    if (sourceColId !== destColId) {
+      movedTicket.status = destColId;
+    }
+
+    // Insert into destination
+    updatedColumns[destColId].items.splice(destIndex, 0, movedTicket);
 
     setColumns(updatedColumns);
   };
 
   const handleDelete = (ticketId) => {
-    const updatedColumns = JSON.parse(JSON.stringify(columns));
-    for (const key in updatedColumns) {
-      updatedColumns[key].items = updatedColumns[key].items.filter(
-        (ticket) => ticket.id !== ticketId
-      );
+    const updated = JSON.parse(JSON.stringify(columns));
+    for (const key in updated) {
+      updated[key].items = updated[key].items.filter((t) => t.id !== ticketId);
     }
-    setColumns(updatedColumns);
+    setColumns(updated);
   };
 
   const handleTicketCreate = (newTicket) => {
-    setColumns(prevColumns => {
-      const updatedColumns = JSON.parse(JSON.stringify(prevColumns));
-      updatedColumns[newTicket.status].items.push(newTicket);
-      return updatedColumns;
+    setColumns((prev) => {
+      const updated = JSON.parse(JSON.stringify(prev));
+      updated[newTicket.status].items.push(newTicket);
+      return updated;
     });
   };
 
   const handleTicketUpdate = (updatedTicket) => {
-    const updatedColumns = JSON.parse(JSON.stringify(columns));
-    Object.keys(updatedColumns).forEach((key) => {
-      updatedColumns[key].items = updatedColumns[key].items.filter(
-        (item) => item.id !== updatedTicket.id
-      );
+    const updated = JSON.parse(JSON.stringify(columns));
+    Object.keys(updated).forEach((key) => {
+      updated[key].items = updated[key].items.filter((i) => i.id !== updatedTicket.id);
     });
-    updatedColumns[updatedTicket.status].items.push(updatedTicket);
-    setColumns(updatedColumns);
+    updated[updatedTicket.status].items.push(updatedTicket);
+    setColumns(updated);
   };
 
   return (
     <div>
-      <DragDropContext onDragEnd={handleDrop}>
+      <DndContext
+        sensors={sensors}
+        collisionDetection={closestCorners}
+        onDragEnd={handleDragEnd}
+      >
         <div className="board">
           {Object.entries(columns).map(([key, column]) => (
-            <Droppable droppableId={key} key={key}>
-              {(provided, snapshot) => (
-                <div
-                  className={`column ${snapshot.isDraggingOver ? "drag-over" : ""}`}
-                  ref={provided.innerRef}
-                  {...provided.droppableProps}
+            <ColumnDroppable key={key} columnKey={key}>
+              <div className="column">
+                <h2>{column.title}</h2>
+
+                <SortableContext
+                  items={column.items.map((item) => item.id)}
+                  strategy={verticalListSortingStrategy}
                 >
-                  <h2>{column.title}</h2>
+                  <div className="column-tickets">
+                    {column.items.map((ticket) => (
+                      <SortableTicket
+                        key={ticket.id}
+                        ticket={ticket}
+                        columnKey={key}
+                        onEdit={() => {
+                          setEditTicket({ ...ticket, status: key });
+                          setModalOpen(true);
+                        }}
+                        onDelete={() => handleDelete(ticket.id)}
+                      />
+                    ))}
+                  </div>
+                </SortableContext>
 
-                  {column.items.map((ticket, index) => (
-                    <Draggable key={ticket.id} draggableId={ticket.id} index={index}>
-                      {(provided, snapshot) => (
-                        <div
-                          className={`ticket ${snapshot.isDragging ? "dragging" : ""}`}
-                          ref={provided.innerRef}
-                          {...provided.draggableProps}
-                          {...provided.dragHandleProps}
-                        >
-                          <p>{ticket.title}</p>
-                          {key === "todo" && (
-                            <div className="ticket-actions">
-                              <FaEdit
-                                className="icon edit-icon"
-                                onClick={() => {
-                                  setEditTicket({ ...ticket, status: key });
-                                  setModalOpen(true);
-                                }}
-                              />
-                              <FaTrash
-                                className="icon delete-icon"
-                                onClick={() => handleDelete(ticket.id)}
-                              />
-                            </div>
-                          )}
-                        </div>
-                      )}
-                    </Draggable>
-                  ))}
-
-                  {provided.placeholder}
-
-                  {/* Only show the "+" button in the "todo" column */}
-                  {key === "todo" && (
-                    <button
-                      className="add-ticket-plus"
-                      onClick={() => {
-                        setEditTicket(null);
-                        setCreateInStatus(key);
-                        setModalOpen(true);
-                      }}
-                    >
-                      +
-                    </button>
-                  )}
-                </div>
-              )}
-            </Droppable>
+                {key === "todo" && (
+                  <button
+                    className="add-ticket-plus"
+                    onClick={() => {
+                      setEditTicket(null);
+                      setCreateInStatus(key);
+                      setModalOpen(true);
+                    }}
+                  >
+                    +
+                  </button>
+                )}
+              </div>
+            </ColumnDroppable>
           ))}
         </div>
-      </DragDropContext>
+      </DndContext>
 
       {modalOpen && (
         <TicketModal
@@ -162,6 +203,15 @@ export default function Board() {
           defaultStatus={createInStatus}
         />
       )}
+    </div>
+  );
+}
+
+function ColumnDroppable({ columnKey, children }) {
+  const { setNodeRef } = useDroppable({ id: columnKey });
+  return (
+    <div ref={setNodeRef} className="column-wrapper">
+      {children}
     </div>
   );
 }

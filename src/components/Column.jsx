@@ -1,30 +1,25 @@
 import React from "react";
 import Ticket from "./Ticket";
-import { Droppable } from "react-beautiful-dnd";
+import { useDroppable } from "@dnd-kit/core";
 
 const Column = ({ columnKey, column, onEdit }) => {
+  const { setNodeRef } = useDroppable({
+    id: columnKey,
+  });
+
   return (
-    <div className={`column ${columnKey}`}>
+    <div className={`column ${columnKey}`} ref={setNodeRef}>
       <h4>{column.title}</h4>
-      <Droppable droppableId={columnKey} type="task">
-        {(provided) => (
-          <div
-            className="column-tickets"
-            ref={provided.innerRef}
-            {...provided.droppableProps}
-          >
-            {column.items.map((ticket, index) => (
-              <Ticket
-                key={ticket.id}
-                ticket={ticket}
-                index={index}
-                onEdit={() => onEdit(ticket)}
-              />
-            ))}
-            {provided.placeholder}
-          </div>
-        )}
-      </Droppable>
+      <div className="column-tickets">
+        {column.items.map((ticket, index) => (
+          <Ticket
+            key={ticket.id}
+            ticket={ticket}
+            index={index}
+            onEdit={() => onEdit(ticket)}
+          />
+        ))}
+      </div>
     </div>
   );
 };

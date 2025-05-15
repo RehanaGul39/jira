@@ -35,7 +35,6 @@ body {
   padding: 1rem;
 }
 
-/* Board Layout */
 .board {
   display: flex;
   gap: 1.5rem;
@@ -48,13 +47,18 @@ body {
   padding: 10px;
   border-radius: 8px;
   margin-bottom: 10px;
-  transition: none;
+  will-change: transform;
+  transition: transform 0.2s ease, background-color 0.2s ease;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
 }
 
+
 .ticket.dragging {
-  transform: rotate(1deg) scale(1.03);
-  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+  transform: translateZ(0) scale(1.03) rotate(1deg);
+  transition: transform 0.1s ease;
+  will-change: transform;
+  z-index: 10;
+  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
 }
 
 .column.drag-over {
@@ -62,7 +66,7 @@ body {
   border: 2px dashed #a3a3ff;
 }
 
-/* Main Content Area */
+
 .dashboard-main {
   margin-left: 200px;
   padding: 2rem;
@@ -168,7 +172,7 @@ label {
   color: #333;
 }
 
-/* Columns */
+
 .column {
   background-color: #ffffff;
   border-radius: 10px;
@@ -186,6 +190,12 @@ label {
   border-bottom: 1px solid #eee;
   padding-bottom: 0.5rem;
 }
+.column {
+  min-height: 300px; 
+  padding: 8px;
+  background-color: #f5f5f5;
+  border-radius: 4px;
+}
 
 .empty-state {
   color: #999;
@@ -194,7 +204,6 @@ label {
   margin-top: 0.5rem;
 }
 
-/* Tickets */
 .ticket {
   background-color: #fdfdfd;
   border-radius: 8px;
@@ -205,6 +214,7 @@ label {
   cursor: grab;
   transition: transform 0.2s, background-color 0.2s;
 }
+
 
 .ticket:hover {
   background-color: #f5f8fa;
@@ -222,7 +232,7 @@ label {
   margin-top: 0.5rem;
 }
 
-/* Ticket Actions */
+
 .ticket-actions {
   position: absolute;
   top: 8px;
@@ -230,6 +240,13 @@ label {
   display: flex;
   gap: 10px;
 }
+.ticket.dragging {
+  transition: none;
+  box-shadow: 0 5px 15px rgba(0,0,0,0.2); /* for better UX */
+  background: #fff;
+  z-index: 1000;
+}
+
 
 .icon {
   font-size: 16px;
@@ -246,7 +263,7 @@ label {
   color: #de350b;
 }
 
-/* Modal Overlay */
+
 .modal-overlay {
   position: fixed;
   top: 0;
@@ -270,7 +287,7 @@ label {
   box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
 }
 
-/* Modal Window */
+
 .modal {
   background-color: #ffffff;
   padding: 2.5rem;
@@ -348,7 +365,6 @@ label {
   background-color: #e0e0e0;
 }
 
-/* Close button */
 .modal-close {
   position: absolute;
   top: 1.25rem;
@@ -395,7 +411,7 @@ label {
   transform: rotate(90deg);
 }
 
-/* Add Ticket Button */
+
 .add-ticket-btn {
   padding: 0.5rem 1rem;
   border: none;
@@ -411,7 +427,6 @@ label {
   background-color: #0065ff;
 }
 
-/* Sidebar Container */
 .sidebar {
   width: 200px;
   background-color: #172b4d;
@@ -427,7 +442,6 @@ label {
   z-index: 100;
 }
 
-/* Logo */
 .sidebar .logo {
   font-size: 1.5rem;
   font-weight: bold;
@@ -436,7 +450,7 @@ label {
   color: #fff;
 }
 
-/* Navigation */
+
 .sidebar nav ul {
   list-style: none;
   padding: 0;
@@ -516,7 +530,6 @@ label {
   background-color: #0065ff;
 }
 
-/* Responsive Filters */
 @media (max-width: 768px) {
   .column {
     min-width: 90vw;
@@ -547,11 +560,11 @@ label {
 .add-ticket-plus:hover {
   color: #0056b3;
 }
-/* User Profile Section */
+
 .user-profile {
   display: flex;
   align-items: center;
-  gap: 1rem;  /* Space between image and name */
+  gap: 1rem;  
 }
 
 .user-image {

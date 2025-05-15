@@ -1,0 +1,15 @@
+/* theme.css */
+:root {
+  --bg-color: #ffffff;
+  --text-color: #000000;
+  --card-bg: #f4f4f4;
+  --border-color: #ddd;
+  /* add more as needed */
+}
+
+[data-theme="dark"] {
+  --bg-color: #121212;
+  --text-color: #f0f0f0;
+  --card-bg: #1e1e1e;
+  --border-color: #444;
+}
